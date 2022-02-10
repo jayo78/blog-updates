@@ -1,10 +1,12 @@
 import puppeteer from "puppeteer";
 import * as nodemailer from "nodemailer";
-import { emailsToArray, formatPostContent, getCurrNumPosts } from "./utils";
+import { writeCountFile, emailsToArray, formatPostContent, getCurrNumPosts } from "./utils";
+import dotenv from "dotenv";
+dotenv.config();
 
 const config = {
     blogUrl: "https://seam.cs.umd.edu/purtilo/435/blog.html",
-    postCountFile: ".count.PERSIST",
+    cntStateFileName: ".count.STATE",
     emailsFile: "emails.txt",
     emailSender: process.env.EMAIL_SENDER,
     emailPass: process.env.EMAIL_PASS,
@@ -15,7 +17,7 @@ const config = {
 const getTableEntries = async (url: string) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    await page.goto("https://seam.cs.umd.edu/purtilo/435/blog.html", {
+    await page.goto(url, {
         waitUntil: "networkidle0",
     });
 
@@ -57,19 +59,30 @@ const sendEmailUpdates = async (newPostsContent: string) => {
     );
 };
 
+//
+// scrape => check if new posts => send new posts to email list
 (async () => {
+    console.log("[Main] fetching updates");
     const entries = await getTableEntries(config.blogUrl);
-    console.log("num entries: " + entries.length);
-    const currNumPosts = getCurrNumPosts(config.postCountFile);
+    console.log("[Main] got num entries: " + entries.length);
+    const currNumPosts = getCurrNumPosts(config.cntStateFileName);
 
-    const diff = entries.length - currNumPosts;
-    console.log("diff: " + diff);
-    if (diff) {
-        const posts = entries.slice(currNumPosts).map((post) => formatPostContent(post));
-        const postsContent = posts.join(
-            "\n========================================================================\n"
-        );
-        console.log(postsContent);
-        // sendEmailUpdates(postsContent);
+    if (currNumPosts === null) {
+        // no count state file - first time running
+        // write new count state file with entries.length so we don't send all posts
+        writeCountFile(config.cntStateFileName, entries.length);
+    } else {
+        const diff = entries.length - currNumPosts;
+        console.log("[Main] diff: " + diff);
+        if (diff) {
+            const posts = entries
+                .reverse()
+                .slice(currNumPosts)
+                .map((post) => formatPostContent(post));
+            const postsContent = posts.join("\n");
+            console.log("[Main] sending emails");
+            sendEmailUpdates(postsContent);
+            writeCountFile(config.cntStateFileName, entries.length);
+        }
     }
 })();
