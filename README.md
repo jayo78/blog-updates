@@ -2,7 +2,7 @@
 scrape blog updates from the 435 blog website (https://seam.cs.umd.edu/purtilo/435/blog.html) and send emails with the new posts
 
 ## what
-- parse rendered html from the blog url on a continuous and parse out new posts
+- parse rendered html from the blog url on a continuous basis and parse out new posts
 - store state for already seen blog posts and only send emails if the state of the blog has updated   
 
 ## how
