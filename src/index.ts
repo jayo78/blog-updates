@@ -79,7 +79,7 @@ const sendEmailUpdates = async (newPostsContent: string) => {
                 .reverse()
                 .slice(currNumPosts)
                 .map((post) => formatPostContent(post));
-            const postsContent = posts.join("\n");
+            const postsContent = posts.reverse().join("\n");
             console.log("[Main] sending emails");
             sendEmailUpdates(postsContent);
             writeCountFile(config.cntStateFileName, entries.length);
