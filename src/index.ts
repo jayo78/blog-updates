@@ -2,7 +2,7 @@ import puppeteer from "puppeteer";
 import * as nodemailer from "nodemailer";
 import { writeCountFile, emailsToArray, formatPostContent, getCurrNumPosts } from "./utils";
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: __dirname + "/./../.env" });
 
 const config = {
     blogUrl: "https://seam.cs.umd.edu/purtilo/435/blog.html",
@@ -38,7 +38,7 @@ const sendEmailUpdates = async (newPostsContent: string) => {
     let emails = emailsToArray(config.emailsFile);
 
     const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.mail.com",
         secure: true,
         socketTimeout: 5000,
         auth: {
@@ -62,6 +62,8 @@ const sendEmailUpdates = async (newPostsContent: string) => {
 //
 // scrape => check if new posts => send new posts to email list
 (async () => {
+    console.log(config.emailSender);
+    console.log(config.emailPass);
     console.log("[Main] fetching updates");
     const entries = await getTableEntries(config.blogUrl);
     console.log("[Main] got num entries: " + entries.length);
