@@ -5,12 +5,6 @@ scrape blog updates from the 435 blog website (https://seam.cs.umd.edu/purtilo/4
 - parse rendered html from the blog url on a continuous basis and parse out new posts
 - store state for already seen blog posts and only send emails if the state of the blog has updated   
 
-## how
-after building, running `npm start` will execute the updater. updater uses puppeteer to scrape
-and parse out blog posts held in html table rows. it will then check the state file (.count.STATE by default)
-and see if the number of scraped blog posts exceeds the value in this file, if it does, then nodemailer is used
-with provided crendials in .env to send email updates containing the new posts to all emails in emails.txt
-
 ## setup
 - install deps `npm install`
 - build `npm run build`
